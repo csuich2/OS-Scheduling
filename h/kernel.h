@@ -52,7 +52,12 @@ typedef	char		Bool;		/* Boolean type			*/
 #define	INITREG		0		/* initial register contents	*/
 #define	QUANTUM		10		/* clock ticks until preemption	*/
 
+/* Scheduling constants */
+#define AGINGSCHED	1
+#define LINUXSCHED	2
 
+#define MIN_PRIORITY	0
+#define MAX_PRIORITY	99
 
 /* Machine size definitions						*/
 

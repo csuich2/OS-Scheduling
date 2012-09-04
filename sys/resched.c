@@ -7,23 +7,13 @@
 #include <stdio.h>
 #include <math.h>
 
-#define AGINGSCHED	1
-#define LINUXSCHED	2
-
-#define MIN_PRIORITY	0
-#define MAX_PRIORITY	99
-
 int sched_method = AGINGSCHED;
 
 int rollover_threshold = 1;
-int epoch_remaining = 0;
+//int epoch_remaining = 0;
 
 unsigned long currSP;	/* REAL sp of current process */
 extern int ctxsw(int, int, int, int);
-
-void setschedclass(int sched_class);
-int  getschedclass();
-void setrolloverthreshold(int threshold);
 
 /* Some 'private' methods*/
 void _resched_aging(struct pentry *optr, struct pentry *nptr);
@@ -61,10 +51,7 @@ void _resched_aging(struct pentry *optr, struct pentry *nptr)
 	   priority by a factor of 1.2 */
 	int next = q[rdyhead].qnext;
 	while (q[next].qnext != EMPTY) {
-		int before = q[next].qkey;
 		q[next].qkey = min(MAX_PRIORITY, ceil(q[next].qkey * 1.2));
-		//if (next != 0 && next != 49)
-		//	kprintf("id: %d, before: %d, after: %d\n", next, before, q[next].qkey); 
 		next = q[next].qnext;
 	}
 

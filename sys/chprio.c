@@ -22,8 +22,9 @@ SYSCALL chprio(int pid, int newprio)
 		return(SYSERR);
 	}
 	pptr->pprio = newprio;
-	if (getschedclass() == AGINGSCHED)
+	if (getschedclass() == AGINGSCHED) {
 		q[pid].qkey = newprio;
+	}
 	restore(ps);
 	return(newprio);
 }
