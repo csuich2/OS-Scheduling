@@ -99,6 +99,8 @@ int main();
 int panic(char *msg);
 int ready(int pid, int resch);
 int resched();
+void setschedclass(int sched_class);
+int getschedclass();
 int set_evec(u_int xnum, u_long handler);
 void trap(int inum);
 int xdone();

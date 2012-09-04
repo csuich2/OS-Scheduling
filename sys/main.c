@@ -11,7 +11,7 @@ void halt();
  *  main  --  user main program
  *------------------------------------------------------------------------
  */
-int main()
+int main0()
 {
 	kprintf("\n\nHello World, Xinu lives\n\n");
 	return 0;
