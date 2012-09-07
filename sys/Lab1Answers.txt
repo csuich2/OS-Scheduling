@@ -1,0 +1,46 @@
+1)
+Round Robin:
+**Advantages:
+  -Extremely simple
+  -Ensures highest priority processes are executed ASAP
+  -Ensures processes with equal priority take turns executing
+**Disadvantages:
+  -Processes with lower priorities are not executed until all processes with
+	higher priorities finish executing
+  -Starvation is likely
+
+Aging:
+**Advantages:
+  -Still fairly simple
+  -Attempts to let high priority processes execute soon
+  -Allows priority of low priority processes to slowly grow as they are not executed as to
+	attempt to avoid starvation
+**Disadvantages:
+  -Starvation can still occur for a while, although no process will never starve completely
+  -Starvation could even occur in high priority processes. Although they will eventually
+	execute, their executions could be few and far between if there are many processes
+	competing with it
+
+Linux-like:
+**Advantages:
+  -Ensures all processes get a chance to execute periodically
+  -Weights execution time based on priority, so higher priority processes get more time
+  -Processes which are blocked for some reason are allowed to carry some portion of their
+	remaining time over
+**Disadvantages:
+  -Far more complex
+  -Rescheduling takes a lot of time
+
+2) All of the scheduling policies affect the NULL process in more or less the same way. They all
+use a very low priority to ensure that the NULL process is not executed, performing idle work
+while there is actual useful work to be done. Despite the same affect, each policy handles the
+NULL process in a different way.
+
+**Round robin: Since the NULL process has a priority of 0, it will not be executed if there are
+any other processes on the queue since they will have a priority over 0.
+**Aging: This policy handles the NULL process very similar to round robin with the added fact
+that the NULL process' priority of 0, when multiplied by 1.2 is still 0, so it's priority will
+never grow, so it will never be chosen to run if there are other processes in the queue.
+**Linux-like: Since the NULL process has a priority of 0, no quantum time is alloted to it and
+the other processes, which do have quantum, will be given time to execute. If there are no
+other processes, then the NULL process will be selected despite the fact it has no quantum.
