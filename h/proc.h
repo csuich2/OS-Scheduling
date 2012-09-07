@@ -60,6 +60,13 @@ struct	pentry	{
 	int	fildes[_NFILE];		/* file - device translation	*/
 	int	ppagedev;		/* pageing dgram device		*/
 	int	pwaitret;
+	int	pquantum;		/* quantum given to this procss */
+	int	pcounter;		/* quantum left for this epoch	*/
+	int	pprio2;			/* to use when calculating goodness
+					   since priority cannot change
+					   during an epoch */
+	int	pcan_run;		/* indicates if this process can
+					   run in the current epoch	*/
 };
 
 

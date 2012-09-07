@@ -2,7 +2,9 @@
 
 #include <conf.h>
 #include <kernel.h>
+#include <proc.h>
 #include <q.h>
+#include <stdio.h>
 
 /*------------------------------------------------------------------------
  * getfirst  --	 remove and return the first process on a list
@@ -27,9 +29,18 @@ int getfirst(int head)
 int getlast(int tail)
 {
 	int	proc;			/* last process on the list	*/
-
-	if ((proc=q[tail].qprev) < NPROC)
+	
+	int entry = q[tail].qprev;
+	if (getschedclass() == LINUXSCHED) {
+		while (!proctab[entry].pcan_run) {
+			//kprintf("skipping pid %d because it can't run\n", entry);
+			entry = q[entry].qprev;
+		}
+	}
+	
+	if ((proc=entry) < NPROC)
 		return( dequeue(proc) );
 	else
 		return(EMPTY);
 }
+
