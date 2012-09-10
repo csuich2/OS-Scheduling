@@ -47,6 +47,8 @@ int resched()
 
 void _resched_aging(struct pentry *optr, struct pentry *nptr)
 {
+	int oldpreempt = preempt;
+	preempt = MAXINT;
 	/* Loop through everything in the queue and increase each entries
 	   priority by a factor of 1.2 */
 	int next = q[rdyhead].qnext;
@@ -69,6 +71,7 @@ void _resched_aging(struct pentry *optr, struct pentry *nptr)
 	   no context switch is necessary */
 	if (currpid == oldcurrpid) {
 		optr->pstate = PRCURR;
+		preempt = oldpreempt;
 		return;
 	}
 
@@ -104,8 +107,8 @@ void _resched_linux(struct pentry *optr, struct pentry *nptr)
  	   counter > 0 */
 	while (q[item].qprev != EMPTY) {
 		/* If we find an eligible process, flag the epoch as not done */
-		if (proctab[item].pcan_run && proctab[item].pstate == PRREADY &&
-		   proctab[item].pcounter > 0) {
+		if (proctab[item].pcan_run && (proctab[item].pstate == PRREADY ||
+		    proctab[item].pstate == PRCURR) && proctab[item].pcounter > 0) {
 			done_with_epoch = 0;
 			break;
 		}
@@ -157,7 +160,7 @@ void _resched_linux(struct pentry *optr, struct pentry *nptr)
  				   insert it back in with the new goodness value */
 				else {
 					dequeue(pid);
-					insert(pid, rdyhead, proctab[pid].pcounter + proctab[pid].pprio2);
+					insert(pid, rdyhead, new_goodness);
 				}
 			}
 		}
@@ -167,14 +170,6 @@ void _resched_linux(struct pentry *optr, struct pentry *nptr)
 			optr->pstate = PRREADY;
 			insert(currpid, rdyhead, proctab[currpid].pcounter + proctab[currpid].pprio2);
 		}
-
-		pid = q[rdyhead].qnext;
-		//kprintf("\nepoch over - added procs back in\n");
-		//while (q[pid].qnext != EMPTY) {
-		//	kprintf("%d(%d) ", pid, proctab[pid].pcounter);
-		//	pid = q[pid].qnext;
-		//}
-		//kprintf("\n");
 	}
 	/* Put the current process back into the ready queue */
 	else if (optr->pstate == PRCURR) {
@@ -186,13 +181,6 @@ void _resched_linux(struct pentry *optr, struct pentry *nptr)
 		optr->pstate = PRREADY;
 		insert(currpid, rdyhead, new_goodness);
 	}
-	//int pid = q[rdyhead].qnext;
-	//kprintf("\n");
-	//while (q[pid].qnext != EMPTY) {
-	//		kprintf("%d(%d) ", pid, proctab[pid].pcounter);
-	//		pid = q[pid].qnext;
-	//}
-	//kprintf("\n");
 
 	/* Get the item with the highest 'goodness' */
 	currpid = getlast(rdytail);

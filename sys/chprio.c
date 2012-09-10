@@ -22,8 +22,19 @@ SYSCALL chprio(int pid, int newprio)
 		return(SYSERR);
 	}
 	pptr->pprio = newprio;
+	// If we are currently using the aging scheduler...
 	if (getschedclass() == AGINGSCHED) {
+		// We want to updated the queue priority now
+		// (the linux-like scheduler will do that itself)
 		q[pid].qkey = newprio;
+		// If this priority is in the ready queue...
+		if (isinqueue(pid, rdyhead)) {
+			// Then we need to remove it from the queue
+			dequeue(pid);
+			// And put it back in so that the queue
+			// will remain sorted
+			insert(pid, rdyhead, newprio);
+		}
 	}
 	restore(ps);
 	return(newprio);

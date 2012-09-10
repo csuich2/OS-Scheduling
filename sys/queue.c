@@ -38,3 +38,19 @@ int dequeue(int item)
 	q[mptr->qnext].qprev = mptr->qprev;
 	return(item);
 }
+
+/*------------------------------------------------------------------------
+ *   isinqueue -- checks if an item is in the queue
+ *------------------------------------------------------------------------
+ */
+int isinqueue(int item, int head)
+{
+	int next = q[head].qnext;
+	while (q[next].qnext != EMPTY) {
+		if (next == item)
+			return 1;
+		next = q[next].qnext;
+	}
+
+	return 0;
+}
