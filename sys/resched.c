@@ -10,7 +10,6 @@
 int sched_method = AGINGSCHED;
 
 int rollover_threshold = 5;
-int epoch_remaining = 0;
 
 unsigned long currSP;	/* REAL sp of current process */
 extern int ctxsw(int, int, int, int);
@@ -89,15 +88,12 @@ void _resched_aging(struct pentry *optr, struct pentry *nptr)
 
 void _resched_linux(struct pentry *optr, struct pentry *nptr)
 {
-	/* Copy over however much counter the current process had left */
-	int counter_diff = proctab[currpid].pcounter - preempt;
-	proctab[currpid].pcounter -= counter_diff;
-	/* Subtract from the epoch however much time this process just used */
-	if (epoch_remaining > 0) {
-		epoch_remaining -= counter_diff;
-	}
-
+	int oldpreempt = preempt;
 	preempt = MAXINT;
+	
+	/* Copy over however much counter the current process had left */
+	int counter_diff = proctab[currpid].pcounter - oldpreempt;
+	proctab[currpid].pcounter -= counter_diff;
 
 	/* Check to see if there are any processes on the ready queue
  	   which are able to run and have quantum left */
@@ -117,9 +113,7 @@ void _resched_linux(struct pentry *optr, struct pentry *nptr)
 	}
 
 	/* If the epoch is over or we have no proceses eligible to execute for this epoch */
-	if (epoch_remaining <= 0 || done_with_epoch) {
-		epoch_remaining = 0;
-		
+	if (done_with_epoch) {
 		/* Make sure the null proc has a counter of 0 */
 		proctab[NULLPROC].pcounter = 0;
 
@@ -143,8 +137,6 @@ void _resched_linux(struct pentry *optr, struct pentry *nptr)
 			else {
 				proctab[pid].pquantum = proctab[pid].pcounter = proctab[pid].pprio2;
 			}
-			/* Update the system's epoch counter with this processes quantum */
-			epoch_remaining += proctab[pid].pquantum;
 			
 			/* If this process is on the ready queue, make sure it's in the right
  			   spot since it's key may have changed */	
@@ -175,7 +167,10 @@ void _resched_linux(struct pentry *optr, struct pentry *nptr)
 	else if (optr->pstate == PRCURR) {
 		int new_goodness = optr->pcounter > 0 ? optr->pcounter + optr->pprio2 : 0;
 		if (new_goodness > lastkey(rdytail)) {
-			preempt = optr->pcounter;
+			if (currpid != 0)
+				preempt = optr->pcounter;
+			else
+				preempt = QUANTUM;
 			return;
 		}
 		optr->pstate = PRREADY;
@@ -189,7 +184,10 @@ void _resched_linux(struct pentry *optr, struct pentry *nptr)
 	nptr = &proctab[currpid];
 	nptr->pstate = PRCURR;
 #ifdef	RTCLOCK
-	preempt = nptr->pcounter;
+	if (currpid != 0)
+		preempt = nptr->pcounter;
+	else
+		preempt = QUANTUM;
 #endif
 
 	ctxsw((int)&optr->pesp, (int)optr->pirmask, (int)&nptr->pesp, (int)nptr->pirmask);

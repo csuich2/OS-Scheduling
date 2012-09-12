@@ -11,7 +11,7 @@
  * while it changes its own priority to 5.
  */
 #define LOOP	50
-int prch4(), prA, prB, prC, prD;
+int prch4(), prch5(), prA, prB, prC, prD;
 
 int main()
 {
@@ -29,7 +29,7 @@ int main()
 
 	resume(prA = create(prch4,2000,10,"proc A",1,'A'));
 	resume(prB = create(prch4,2000, 9,"proc B",1,'B'));
-	resume(prC = create(prch4,2000,10,"proc C",1,'C'));
+	resume(prC = create(prch5,2000,10,"proc C",1,'C'));
 	
 	while (j++ < LOOP / 2) {
 		kprintf("%c", 'D');
@@ -39,9 +39,9 @@ int main()
 	chprio(prB,      15);
 	chprio(getpid(),  5);
 	
-	kprintf("\nPriority Changed & prD resuming...\n");
-
 	resume(prD = create(prch4,2000,70,"proc E",1,'E'));
+	kprintf("%d going to sleep\n", getpid());
+	sleep(10);
 	while (j++ < LOOP) {
 		kprintf("%c", 'D');
 		for (i=0; i< 10000000; i++);
@@ -56,6 +56,19 @@ char c;
 
 	while(j++ < LOOP) {
 		kprintf("%c", c);
+		for (i=0; i< 10000000; i++);
+	}
+}
+
+prch5(c)
+char c;
+{
+	int i, j=0;
+	while(j++ < LOOP) {
+		kprintf("%c", c);
+
+		if (j == 25)
+			sleep(5); 
 		for (i=0; i< 10000000; i++);
 	}
 }
