@@ -13,7 +13,7 @@
 #define LOOP	50
 int prch4(), prch5(), prA, prB, prC, prD;
 
-int main()
+int main4()
 {
 	int i, j=0;
 	int s = 0;
@@ -40,7 +40,6 @@ int main()
 	chprio(getpid(),  5);
 	
 	resume(prD = create(prch4,2000,70,"proc E",1,'E'));
-	kprintf("%d going to sleep\n", getpid());
 	sleep(10);
 	while (j++ < LOOP) {
 		kprintf("%c", 'D');
